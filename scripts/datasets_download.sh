@@ -4,7 +4,10 @@ then
     pip install gdown
 fi
 
+# for files, use "https://drive.google.com/uc?id=<FILE_ID>"
 ANNOTATIONS_URL="https://drive.google.com/drive/folders/1E0B4tQdwnqCmQXvqHAaGAXvqu1-I926d"
+DATASETS_URL="https://drive.google.com/drive/folders/14bYSFTiJtyGNDyCYkv6kGIx3jHyovZlS"
+FRAMES_URL="https://drive.google.com/uc?id=1Mgy5-RYVHIPRSYzyqacpmweImIcc8Hfx"
 
 # download datasets
 gdown $ANNOTATIONS_URL -O data/HuPR --folder
@@ -12,10 +15,17 @@ gdown $ANNOTATIONS_URL -O data/HuPR --folder
 # mv data/HuPR/annotations/hrnet_annot_train.json data/HuPR/hrnet_annot_train.json
 # mv data/HuPR/annotations/hrnet_annot_val.json data/HuPR/hrnet_annot_val.json
 
+# download frames.zip
+gdown $FRAMES_URL -O data/HuPR/frames.zip
+
 # let it like this for now
 # use for loop next time
-gdown "https://drive.google.com/uc?id=1BuXBbBJ4DsZ7l5f2Y368GDT87M57Zt0F" -O data/HuPR/
+gdown $DATASETS_URL -O data/HuPR/ --folder
 
-# unzip all zip file in HuPR
-7z x data/HuPR/*.zip -odata/HuPR/
-rm -rf data/HuPR/*.zip
+# unzip the zip files one by one then deletes it
+if [ ! -d data/HuPR/frames ]; then
+    for file in data/HuPR/*.zip; do
+        unzip -d "${file%.zip}" "$file"
+        rm "$file"
+    done
+fi
