@@ -25,7 +25,7 @@ gdown $DATASETS_URL -O data/HuPR/ --folder
 # unzip the zip files one by one then deletes it
 if [ ! -d data/HuPR/frames ]; then
     for file in data/HuPR/*.zip; do
-        unzip -d "${file%.zip}" "$file"
+        7z x "$file" -y -r -odata/HuPR/
         rm "$file"
     done
 fi
