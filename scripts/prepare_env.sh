@@ -1,2 +1,2 @@
 # install few software
-apt install micro unzip ffmpeg libsm6 libxext6 7z -y
+apt install nano unzip ffmpeg libsm6 libxext6 p7zip-full p7zip-rar -y
