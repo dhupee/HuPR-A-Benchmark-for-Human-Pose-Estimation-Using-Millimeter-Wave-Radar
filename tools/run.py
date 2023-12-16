@@ -2,7 +2,7 @@ import os
 import torch
 import numpy as np
 import torch.optim as optim
-from models import HuPRNet
+from models import HuPRNet, HuPRNet_Mini
 from misc import plotHumanPose
 from datasets import getDataset
 import torch.utils.data as data
@@ -12,7 +12,12 @@ from tools.base import BaseRunner
 
 class Runner(BaseRunner):
     def __init__(self, args, cfg):
-        super(Runner, self).__init__(args, cfg)    
+        super(Runner, self).__init__(args, cfg)
+        if args.distil:
+            self.teacher = HuPRNet(cfg).to(self.device)
+            self.student = HuPRNet_Mini(cfg).to(self.device)
+        if not args.distil:
+            self.model = HuPRNet(self.cfg).to(self.device)
         if not args.eval:
             self.trainSet = getDataset('train', cfg, args)
             self.trainLoader = data.DataLoader(self.trainSet,
@@ -26,7 +31,6 @@ class Runner(BaseRunner):
                               self.cfg.TEST.batchSize,
                               shuffle=False,
                               num_workers=cfg.SETUP.numWorkers)
-        self.model = HuPRNet(self.cfg).to(self.device)
         self.stepSize = len(self.trainLoader) * self.cfg.TRAINING.warmupEpoch
         LR = self.cfg.TRAINING.lr if self.cfg.TRAINING.warmupEpoch == -1 else self.cfg.TRAINING.lr / (self.cfg.TRAINING.warmupGrowth ** self.stepSize)
         self.initialize(LR)
@@ -84,3 +88,7 @@ class Runner(BaseRunner):
             accAP = self.eval(visualization=False, epoch=epoch)
             self.saveModelWeight(epoch, accAP)
             self.saveLosslist(epoch, loss_list, 'train')
+    
+    # def distil(self):
+    #     for epoch in range(self.start_epoch, self.cfg.TRAINING.epochs):
+    #         self.student.train()

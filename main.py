@@ -24,6 +24,7 @@ if __name__ == "__main__":
     parser.add_argument('--config', type=str, default='20211106/test.yaml', metavar='B',
                         help='directory of visualization')
     parser.add_argument('--gpuIDs', default=[0], type=eval, help='IDs of GPUs to use')                        
+    parser.add_argument('--distil', action="store_true")
     parser.add_argument('--eval', action="store_true")
     parser.add_argument('-sr', '--sampling_ratio', type=int, default=1, help='sampling ratio for training/test (default: 1)')
     parser.add_argument('--keypoints', action='store_true', help='print out the APs of all keypoints')
@@ -36,6 +37,8 @@ if __name__ == "__main__":
     if args.eval:
         trigger.loadModelWeight('model_best')
         trigger.eval(visualization=vis)
+    elif args.distil: # TODO: add function for knowledge distillation
+        trigger.distil()
     else:
         trigger.loadModelWeight('checkpoint')
         trigger.train()
