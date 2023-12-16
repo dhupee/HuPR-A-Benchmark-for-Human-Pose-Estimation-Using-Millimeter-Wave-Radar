@@ -45,6 +45,23 @@ class PRGCN(nn.Module):
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
+
+class PRGCN_mini(nn.Module):
+    def __init__(self, cfg, A):
+        super(PRGCN, self).__init__()
+        self.numGroupFrames = cfg.DATASET.numGroupFrames
+        self.numFilters = cfg.MODEL.numFilters
+        self.width = cfg.DATASET.heatmapSize
+        self.height = cfg.DATASET.heatmapSize
+        self.numKeypoints = cfg.DATASET.numKeypoints
+        self.featureSize = (self.height//2) * (self.width//2)
+        self.L1 = GCN_layers(self.featureSize, self.featureSize, self.numKeypoints)
+        # self.L2 = GCN_layers(self.featureSize, self.featureSize, self.numKeypoints)
+        # self.L3 = GCN_layers(self.featureSize,self.featureSize, self.numKeypoints)
+        self.A = A
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
+
     def generate_node_feature(self, x):
         x = F.interpolate(x, scale_factor=0.5, mode='bilinear', align_corners=True)
         x = x.reshape(-1, self.numKeypoints, self.featureSize).permute(0, 2, 1)
@@ -56,6 +73,13 @@ class PRGCN(nn.Module):
         x3 = self.relu(self.L2(x2, self.A))
         keypoints = self.L3(x3, self.A)
         return keypoints.permute(0, 2, 1)
+
+    def gcn_forward_mini(self, x):
+        #x: (B, numFilters, numkeypoints)
+        x2 = self.relu(self.L1(x, self.A))
+        # x3 = self.relu(self.L2(x2, self.A))
+        keypoints = self.L3(x2, self.A)
+        return keypoints.permute(0, 2, 1)    
 
     def forward(self, x):
         nodeFeat = self.generate_node_feature(x)
