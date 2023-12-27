@@ -23,9 +23,14 @@ gdown $FRAMES_URL -O data/HuPR/frames.zip
 gdown $DATASETS_URL -O data/HuPR/ --folder
 
 # unzip the zip files one by one then deletes it
-if [ ! -d data/HuPR/frames ]; then
-    for file in data/HuPR/*.zip; do
-        7z x "$file" -y -r -odata/HuPR/
-        rm "$file"
-    done
+if ! command -v 7z &> /dev/null; then
+    echo "7z not found. Aborting."
+    exit 1
+else
+    if [ ! -d data/HuPR/frames ]; then
+        for file in data/HuPR/*.zip; do
+            7z x "$file" -y -r -odata/HuPR/
+            rm "$file"
+        done
+    fi
 fi
